@@ -9,11 +9,16 @@
 #define NUM_CLASSES 10
 #define NUM_LEVELS 7
 
+struct course {
+    char course_name[NAME_LEN];
+    int grade;
+};
+
 struct student {
     char fname[NAME_LEN];
     char lname[NAME_LEN];
     char cell[CELL_NUM];
-    char* courses[NUM_COURSES];
+    struct course* courses[NUM_COURSES];
     struct student* next_stud;
 };
 
@@ -23,8 +28,21 @@ struct school {
 
 static struct school S;
 
-struct student* make_student(const char* fname, const char* lname, const char* cell, char* courses[]) {
+void insert_student(int level, int class, struct student* new_student) {
+    struct student* current_student = S.db[level][class].next_stud;
+    if (current_student == NULL) {
+        S.db[level][class].next_stud = new_student;
+    } else {
+        while (current_student->next_stud != NULL) {
+            current_student = current_student->next_stud;
+        }
+        current_student->next_stud = new_student;
+    }
+}
+
+struct student* make_student(const char* fname, const char* lname, const char* cell, int grades[]) {
     struct student* new_student = malloc(sizeof(struct student));
+
     if (new_student == NULL) {
         printf("Memory allocation failed.\n");
         return NULL;
@@ -51,22 +69,25 @@ struct student* make_student(const char* fname, const char* lname, const char* c
     return new_student;
 }
 
-
 void parse_data(FILE* file) {
     char line[MAX_LINE_LEN];
     while (fgets(line, sizeof(line), file)) {
-        line[strcspn(line, "\n")] = '\0';
 
         char fname[NAME_LEN], lname[NAME_LEN], cell[CELL_NUM];
-        char* courses[NUM_COURSES] = {0};
+        int grades[NUM_COURSES] = {0};
 
         int level, class;
-        sscanf(line, "%s %s %s %d %d %s %s %s %s %s %s %s %s %s %s",
+        sscanf(line, "%s %s %s %d %d %d %d %d %d %d %d %d %d %d %d",
                fname, lname, cell, &level, &class,
-               courses[0], courses[1], courses[2], courses[3], courses[4],
-               courses[5], courses[6], courses[7], courses[8], courses[9]);
+               &grades[0], &grades[1], &grades[2], &grades[3], &grades[4],
+               &grades[5], &grades[6], &grades[7], &grades[8], &grades[9]);
 
-        struct student* new_student = make_student(fname, lname, cell, courses);
+        struct student* new_student = make_student(fname, lname, cell, grades);
+        if (new_student != NULL) {
+            level--;
+            class--;
+            insert_student(level, class, new_student);
+        }
     }
 }
 
@@ -84,8 +105,5 @@ int main() {
     parse_data(file);
 
     fclose(file);
-
     return 0;
-};
-
-
+}
