@@ -24,33 +24,31 @@ struct school {
 static struct school S;
 
 
-void init_db(FILE* file) {
-
-
+void parse_data(FILE* file) {
     char line[MAX_LINE_LEN];
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = '\0';
 
         char *word = strtok(line, " ");
         while (word != NULL) {
+            // test
             printf("%s\n", word);
             word = strtok(NULL, " ");
         }
     }
 }
 
-
 int main() {
     FILE* file;
     char filename[] = "C:/Users/raedb/Documents/GitHub/checkpoint_raedkbar/students_with_class.txt";
 
-    file = fopen(filename, "r"); // Open the file in write mode
+    file = fopen(filename, "r");
     if (file == NULL) {
         printf("Error opening the file.\n");
         return 1;
     }
 
-    init_db(file);
+    parse_data(file);
 
     fclose(file);
 
