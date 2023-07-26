@@ -40,9 +40,23 @@ void insert_student(int level, int class, struct student* new_student) {
     }
 }
 
+struct course* make_courses_arr(const int grades[]) {
+    struct course *courses = malloc(NUM_COURSES * sizeof(struct course));
+    if (courses == NULL) {
+        printf("Memory allocation failed for courses array.\n");
+        return NULL;
+    }
+
+    for (int i = 0; i < NUM_COURSES; i++) {
+        courses[i].grade = grades++[i];
+        snprintf(courses[i].course_name, NAME_LEN, "Course %d", i + 1);
+    }
+
+    return courses;
+}
+
 struct student* make_student(const char* fname, const char* lname, const char* cell, int grades[]) {
     struct student* new_student = malloc(sizeof(struct student));
-
     if (new_student == NULL) {
         printf("Memory allocation failed.\n");
         return NULL;
@@ -57,17 +71,20 @@ struct student* make_student(const char* fname, const char* lname, const char* c
     strncpy(new_student->cell, cell, CELL_NUM - 1);
     new_student->cell[CELL_NUM - 1] = '\0';
 
+    struct course* courses = make_courses_arr(grades);
+    if (courses == NULL) {
+        free(new_student);
+        return NULL;
+    }
+
     for (int i = 0; i < NUM_COURSES; i++) {
-        if (courses[i] != NULL) {
-            new_student->courses[i] = strdup(courses[i]);
-        } else {
-            new_student->courses[i] = NULL;
-        }
+        new_student->courses[i] = &courses[i];
     }
 
     new_student->next_stud = NULL;
     return new_student;
 }
+
 
 void parse_data(FILE* file) {
     char line[MAX_LINE_LEN];
