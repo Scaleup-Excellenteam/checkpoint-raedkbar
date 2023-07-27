@@ -4,7 +4,7 @@
 
 #define MAX_LINE_LEN 256
 #define NAME_LEN 256
-#define CELL_NUM 10
+#define CELL_NUM 128
 #define NUM_COURSES 10
 #define NUM_CLASSES 10
 #define NUM_LEVELS 12
@@ -108,9 +108,9 @@ void print_data() {
                 printf("Name: %s %s\n", current_student->fname, current_student->lname);
                 printf("Cell: %s\n", current_student->cell);
                 printf("Grades:\n");
-                int i;
-                for (i = 0; i < NUM_COURSES; i++) {
-                    printf("%s: %d\n", course_names[i], current_student->grades[i]);
+                int course;
+                for (course = 0; course < NUM_COURSES; course++) {
+                    printf("%s: %d\n", course_names[course], current_student->grades[course]);
                 }
 
                 printf("\n");
@@ -118,6 +118,113 @@ void print_data() {
             }
         }
     }
+}
+
+struct student* find_student_by_name(const char* fname, const char* lname) {
+    for (int level = 0; level < NUM_LEVELS; level++) {
+        for (int class_num = 0; class_num < NUM_CLASSES; class_num++) {
+            struct student* current_student = S.db[level][class_num];
+
+            while (current_student != NULL) {
+                if (strcmp(current_student->fname, fname) == 0 && strcmp(current_student->lname, lname) == 0) {
+                    return current_student;
+                }
+
+                current_student = current_student->next_stud;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+void insert_new_student() {
+    char fname[NAME_LEN], lname[NAME_LEN], cell[CELL_NUM];
+    int grades[NUM_COURSES];
+
+    printf("Enter first name: ");
+    scanf("%s", fname);
+
+    printf("Enter last name: ");
+    scanf("%s", lname);
+
+    struct student* existing_student = find_student_by_name(fname, lname);
+    if (existing_student != NULL) {
+        printf("Student %s %s already exists in the database.\n", fname, lname);
+        return;
+    }
+
+    printf("Enter cell number: ");
+    scanf("%s", cell);
+
+    int level, class;
+    printf("Enter level and class (e.g., level class): ");
+    scanf("%d %d", &level, &class);
+
+    printf("Enter grades for %d courses:\n", NUM_COURSES);
+    int i;
+    for (i = 0; i < NUM_COURSES; i++) {
+        printf("Enter grade for %s: ", course_names[i]);
+        scanf("%d", &grades[i]);
+    }
+
+    struct student* new_student = make_student(fname, lname, cell, grades);
+    if (new_student != NULL) {
+        level--;
+        class--;
+        insert_student(level, class, new_student);
+        printf("Student %s %s has been inserted into Level %d, Class %d.\n", fname, lname, level + 1, class + 1);
+    }
+}
+
+void db_access_menu() {
+    int choice;
+    printf("1. Insert student\n");
+    printf("2. Delete student\n");
+    printf("3. Update student\n");
+    printf("4. Search for a student by first name and last name\n");
+    printf("5. Present the top ten students in each grade in a particular subject\n");
+    printf("6. Present the students who are candidates for departure, according to parameters of your choice.\n");
+    printf("7. Present average per course per layer\n");
+    printf("8. Export DB\n");
+    printf("0. Exit\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1:
+            insert_new_student();
+            break;
+        case 2:
+
+            break;
+        case 3:
+
+            break;
+        case 4:
+
+            break;
+        case 5:
+
+            break;
+        case 6:
+
+            break;
+        case 7:
+
+            break;
+        case 8:
+
+            break;
+        case 0:
+            printf("Exiting the system.\n");
+            exit(0);
+        default:
+            printf("Invalid choice. Please try again.\n");
+            break;
+    }
+
+    db_access_menu();
 }
 
 int main() {
@@ -134,6 +241,7 @@ int main() {
     fclose(file);
 
     print_data();
+    db_access_menu();
 
     return 0;
 }
