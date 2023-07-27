@@ -9,6 +9,19 @@
 #define NUM_CLASSES 10
 #define NUM_LEVELS 12
 
+const char* course_names[NUM_COURSES] = {
+        "Mathematics",
+        "Physics",
+        "Chemistry",
+        "Biology",
+        "Robotics",
+        "Geology",
+        "History",
+        "Civics",
+        "English",
+        "Hebrew"
+};
+
 struct student {
     char fname[NAME_LEN];
     char lname[NAME_LEN];
@@ -91,11 +104,13 @@ void print_data() {
                 printf("Level: %d, Class: %d\n", level + 1, class + 1);
                 printf("Name: %s %s\n", current_student->fname, current_student->lname);
                 printf("Cell: %s\n", current_student->cell);
-                printf("Grades: ");
+                printf("Grades:\n");
+
                 for (int i = 0; i < NUM_COURSES; i++) {
-                    printf("%d ", current_student->grades[i]);
+                    printf("%s: %d\n", course_names[i], current_student->grades[i]);
                 }
-                printf("\n\n");
+
+                printf("\n");
 
                 current_student = current_student->next_stud;
             }
