@@ -37,14 +37,14 @@ struct school {
 static struct school S;
 
 void insert_student(int level, int class, struct student* new_student) {
-    struct student* current_student = S.db[level][class];
-    if (current_student == NULL) {
+    struct student* head_student = S.db[level][class];
+    if (head_student == NULL) {
         S.db[level][class] = new_student;
     } else {
-        while (current_student->next_stud != NULL) {
-            current_student = current_student->next_stud;
-        }
-        current_student->next_stud = new_student;
+        struct student* temp = head_student->next_stud;
+        new_student->next_stud = head_student->next_stud;
+        head_student->next_stud = new_student;
+        new_student->next_stud = temp;
     }
 }
 
@@ -59,7 +59,8 @@ struct student* make_student(const char* fname, const char* lname, const char* c
     strcpy(new_student->lname, lname);
     strcpy(new_student->cell, cell);
 
-    for(int i = 0; i < NUM_COURSES; i++) {
+    int i;
+    for(i = 0; i < NUM_COURSES; i++) {
         new_student->grades[i] = *grades++;
     }
 
@@ -96,8 +97,10 @@ void parse_data(FILE* file) {
 }
 
 void print_data() {
-    for (int level = 0; level < NUM_LEVELS; level++) {
-        for (int class = 0; class < NUM_CLASSES; class++) {
+    int level;
+    for (level = 0; level < NUM_LEVELS; level++) {
+        int class;
+        for (class = 0; class < NUM_CLASSES; class++) {
             struct student* current_student = S.db[level][class];
 
             while (current_student != NULL) {
@@ -105,13 +108,12 @@ void print_data() {
                 printf("Name: %s %s\n", current_student->fname, current_student->lname);
                 printf("Cell: %s\n", current_student->cell);
                 printf("Grades:\n");
-
-                for (int i = 0; i < NUM_COURSES; i++) {
+                int i;
+                for (i = 0; i < NUM_COURSES; i++) {
                     printf("%s: %d\n", course_names[i], current_student->grades[i]);
                 }
 
                 printf("\n");
-
                 current_student = current_student->next_stud;
             }
         }
