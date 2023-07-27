@@ -73,13 +73,6 @@ void parse_data(FILE* file) {
             continue;
         }
 
-        printf("%s\n", fname);
-        printf("%s\n", lname);
-        printf("%s\n", cell);
-        printf("%d\n", level);
-        printf("%d\n", class);
-
-
         struct student* new_student = make_student(fname, lname, cell, grades);
         if (new_student != NULL) {
             level--;
@@ -89,6 +82,26 @@ void parse_data(FILE* file) {
     }
 }
 
+void print_data() {
+    for (int level = 0; level < NUM_LEVELS; level++) {
+        for (int class = 0; class < NUM_CLASSES; class++) {
+            struct student* current_student = S.db[level][class];
+
+            while (current_student != NULL) {
+                printf("Level: %d, Class: %d\n", level + 1, class + 1);
+                printf("Name: %s %s\n", current_student->fname, current_student->lname);
+                printf("Cell: %s\n", current_student->cell);
+                printf("Grades: ");
+                for (int i = 0; i < NUM_COURSES; i++) {
+                    printf("%d ", current_student->grades[i]);
+                }
+                printf("\n\n");
+
+                current_student = current_student->next_stud;
+            }
+        }
+    }
+}
 
 int main() {
     FILE* file;
@@ -101,7 +114,9 @@ int main() {
     }
 
     parse_data(file);
-
     fclose(file);
+
+    print_data();
+
     return 0;
 }
