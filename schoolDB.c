@@ -3,35 +3,30 @@
 #include <string.h>
 
 #define MAX_LINE_LEN 256
-#define NAME_LEN 10
+#define NAME_LEN 256
 #define CELL_NUM 10
 #define NUM_COURSES 10
 #define NUM_CLASSES 10
-#define NUM_LEVELS 7
-
-struct course {
-    char course_name[NAME_LEN];
-    int grade;
-};
+#define NUM_LEVELS 12
 
 struct student {
     char fname[NAME_LEN];
     char lname[NAME_LEN];
     char cell[CELL_NUM];
-    struct course* courses[NUM_COURSES];
+    int grades[NUM_COURSES];
     struct student* next_stud;
 };
 
 struct school {
-    struct student db[NUM_LEVELS][NUM_CLASSES];
+    struct student* db[NUM_LEVELS][NUM_CLASSES];
 };
 
 static struct school S;
 
 void insert_student(int level, int class, struct student* new_student) {
-    struct student* current_student = S.db[level][class].next_stud;
+    struct student* current_student = S.db[level][class];
     if (current_student == NULL) {
-        S.db[level][class].next_stud = new_student;
+        S.db[level][class] = new_student;
     } else {
         while (current_student->next_stud != NULL) {
             current_student = current_student->next_stud;
@@ -40,45 +35,19 @@ void insert_student(int level, int class, struct student* new_student) {
     }
 }
 
-struct course* make_courses_arr(const int grades[]) {
-    struct course *courses = malloc(NUM_COURSES * sizeof(struct course));
-    if (courses == NULL) {
-        printf("Memory allocation failed for courses array.\n");
-        return NULL;
-    }
-
-    for (int i = 0; i < NUM_COURSES; i++) {
-        courses[i].grade = grades++[i];
-        snprintf(courses[i].course_name, NAME_LEN, "Course %d", i + 1);
-    }
-
-    return courses;
-}
-
 struct student* make_student(const char* fname, const char* lname, const char* cell, int grades[]) {
-    struct student* new_student = malloc(sizeof(struct student));
+    struct student* new_student = (struct student*) malloc(sizeof(struct student));
     if (new_student == NULL) {
         printf("Memory allocation failed.\n");
         return NULL;
     }
 
-    strncpy(new_student->fname, fname, NAME_LEN - 1);
-    new_student->fname[NAME_LEN - 1] = '\0';
+    strcpy(new_student->fname, fname);
+    strcpy(new_student->lname, lname);
+    strcpy(new_student->cell, cell);
 
-    strncpy(new_student->lname, lname, NAME_LEN - 1);
-    new_student->lname[NAME_LEN - 1] = '\0';
-
-    strncpy(new_student->cell, cell, CELL_NUM - 1);
-    new_student->cell[CELL_NUM - 1] = '\0';
-
-    struct course* courses = make_courses_arr(grades);
-    if (courses == NULL) {
-        free(new_student);
-        return NULL;
-    }
-
-    for (int i = 0; i < NUM_COURSES; i++) {
-        new_student->courses[i] = &courses[i];
+    for(int i = 0; i < NUM_COURSES; i++) {
+        new_student->grades[i] = *grades++;
     }
 
     new_student->next_stud = NULL;
@@ -94,10 +63,22 @@ void parse_data(FILE* file) {
         int grades[NUM_COURSES] = {0};
 
         int level, class;
-        sscanf(line, "%s %s %s %d %d %d %d %d %d %d %d %d %d %d %d",
-               fname, lname, cell, &level, &class,
-               &grades[0], &grades[1], &grades[2], &grades[3], &grades[4],
-               &grades[5], &grades[6], &grades[7], &grades[8], &grades[9]);
+        int num_read = sscanf(line, "%s %s %s %d %d %d %d %d %d %d %d %d %d %d %d",
+                              fname, lname, cell, &level, &class,
+                              &grades[0], &grades[1], &grades[2], &grades[3], &grades[4],
+                              &grades[5], &grades[6], &grades[7], &grades[8], &grades[9]);
+
+        if (num_read != 15) {
+            printf("Error reading line: %s\n", line);
+            continue;
+        }
+
+        printf("%s\n", fname);
+        printf("%s\n", lname);
+        printf("%s\n", cell);
+        printf("%d\n", level);
+        printf("%d\n", class);
+
 
         struct student* new_student = make_student(fname, lname, cell, grades);
         if (new_student != NULL) {
