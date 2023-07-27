@@ -177,6 +177,42 @@ void insert_new_student() {
     }
 }
 
+void delete_student() {
+    char fname[NAME_LEN], lname[NAME_LEN];
+
+    printf("Enter first name of the student to delete: ");
+    scanf("%s", fname);
+
+    printf("Enter last name of the student to delete: ");
+    scanf("%s", lname);
+
+    struct student* prev_student = NULL;
+    for (int level = 0; level < NUM_LEVELS; level++) {
+        for (int class_num = 0; class_num < NUM_CLASSES; class_num++) {
+            struct student* current_student = S.db[level][class_num];
+
+            while (current_student != NULL) {
+                if (strcmp(current_student->fname, fname) == 0 && strcmp(current_student->lname, lname) == 0) {
+                    if (prev_student == NULL) {
+                        S.db[level][class_num] = current_student->next_stud;
+                    } else {
+                        prev_student->next_stud = current_student->next_stud;
+                    }
+
+                    free(current_student);
+                    printf("Student %s %s has been deleted from the database.\n", fname, lname);
+                    return;
+                }
+
+                prev_student = current_student;
+                current_student = current_student->next_stud;
+            }
+        }
+    }
+
+    printf("Student %s %s not found in the database.\n", fname, lname);
+}
+
 void db_access_menu() {
     int choice;
     printf("1. Insert student\n");
@@ -196,7 +232,7 @@ void db_access_menu() {
             insert_new_student();
             break;
         case 2:
-
+            delete_student();
             break;
         case 3:
 
