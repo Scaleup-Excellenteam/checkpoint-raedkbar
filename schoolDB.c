@@ -228,7 +228,10 @@ void insert_new_student() {
     // Read student's level and class from the user
     int level, class;
     printf("Enter level and class (e.g., level class): ");
-    scanf("%d %d", &level, &class);
+    if (scanf("%d %d", &level, &class) != 2 || level < 1 || level > NUM_LEVELS || class < 1 || class > NUM_CLASSES) {
+        printf("Invalid level or class number. Please try again.\n\n");
+        return;
+    }
 
     // Read student's grades for each course
     printf("Enter grades for %d courses:\n", NUM_COURSES);
@@ -760,26 +763,21 @@ void db_access_menu() {
 // main function
 int main() {
     FILE* file;
-    char filename[] = "students_with_class.txt";
+    char filename[] = "C:/Users/brr/Documents/GitHub/checkpoint_raedkbar/students_with_class.txt";
 
-    // Open the file for reading
     file = fopen(filename, "r");
     if (file == NULL) {
         printf("Error opening the file.\n");
-        return 1; // Return 1 to indicate an error
+        return 1;
     }
 
-    // Initialize the database by reading data from the file
     init_db(file);
 
-    // Close the file after reading
     fclose(file);
 
-    // Print the data of all students in the database
     //print_data();
 
-    // Enter the database access menu loop
     db_access_menu();
 
-    return 0; // Return 0 to indicate successful execution
+    return 0;
 }
