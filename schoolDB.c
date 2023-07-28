@@ -60,7 +60,7 @@ struct student* make_student(const char* fname, const char* lname, const char* c
     strcpy(new_student->cell, cell);
 
     int i;
-    for(i = 0; i < NUM_COURSES; i++) {
+    for (i = 0; i < NUM_COURSES; i++) {
         new_student->grades[i] = *grades++;
     }
 
@@ -121,9 +121,10 @@ void print_data() {
 }
 
 struct student* find_student_by_name(const char* fname, const char* lname) {
-    for (int level = 0; level < NUM_LEVELS; level++) {
-        for (int class_num = 0; class_num < NUM_CLASSES; class_num++) {
-            struct student* current_student = S.db[level][class_num];
+    int level, class;
+    for (level = 0; level < NUM_LEVELS; level++) {
+        for (class = 0; class < NUM_CLASSES; class++) {
+            struct student* current_student = S.db[level][class];
 
             while (current_student != NULL) {
                 if (strcmp(current_student->fname, fname) == 0 && strcmp(current_student->lname, lname) == 0) {
@@ -187,14 +188,15 @@ void delete_student() {
     scanf("%s", lname);
 
     struct student* prev_student = NULL;
-    for (int level = 0; level < NUM_LEVELS; level++) {
-        for (int class_num = 0; class_num < NUM_CLASSES; class_num++) {
-            struct student* current_student = S.db[level][class_num];
+    int level, class;
+    for (level = 0; level < NUM_LEVELS; level++) {
+        for (class = 0; class < NUM_CLASSES; class++) {
+            struct student* current_student = S.db[level][class];
 
             while (current_student != NULL) {
                 if (strcmp(current_student->fname, fname) == 0 && strcmp(current_student->lname, lname) == 0) {
                     if (prev_student == NULL) {
-                        S.db[level][class_num] = current_student->next_stud;
+                        S.db[level][class] = current_student->next_stud;
                     } else {
                         prev_student->next_stud = current_student->next_stud;
                     }
@@ -296,17 +298,19 @@ void search_student_by_name() {
     printf("Enter last name: ");
     scanf("%s", lname);
 
-    int level, class_num;
+    int level, class;
     for (level = 0; level < NUM_LEVELS; level++) {
-        for (class_num = 0; class_num < NUM_CLASSES; class_num++) {
-            struct student *current_student = S.db[level][class_num];
-            if (S.db[level][class_num] == current_student) {
+        for (class = 0; class < NUM_CLASSES; class++) {
+            struct student *current_student = S.db[level][class];
+            if (S.db[level][class] == current_student) {
                 printf("\nStudent Found:\n");
-                printf("Level: %d, Class: %d\n", level + 1, class_num + 1);
+                printf("Level: %d, Class: %d\n", level + 1, class + 1);
                 printf("Name: %s %s\n", current_student->fname, current_student->lname);
                 printf("Cell: %s\n", current_student->cell);
                 printf("Grades:\n");
-                for (int i = 0; i < NUM_COURSES; i++) {
+
+                int i;
+                for (i = 0; i < NUM_COURSES; i++) {
                     printf("%s: %d\n", course_names[i], current_student->grades[i]);
                 }
                 return;
@@ -315,6 +319,93 @@ void search_student_by_name() {
     }
 
     printf("\nStudent %s %s not found in the database.\n", fname, lname);
+}
+
+
+void present_top_students_by_subject(const char* subject_name) {
+    printf("\nTop Ten Students in %s by Grade:\n", subject_name);
+
+    struct student* top_students[NUM_LEVELS][NUM_CLASSES][10] = {0};
+
+    int level;
+    for (level = 0; level < NUM_LEVELS; level++) {
+        for (int class_num = 0; class_num < NUM_CLASSES; class_num++) {
+            struct student* current_student = S.db[level][class_num];
+
+            while (current_student != NULL) {
+                int total_grade = 0;
+
+                int i;
+                for (i = 0; i < NUM_COURSES; i++) {
+                    if (strcmp(course_names[i], subject_name) == 0) {
+                        total_grade += current_student->grades[i];
+                        break;
+                    }
+                }
+
+                int min_grade_index = 0;
+                for (int i = 1; i < 10; i++) {
+                    if (top_students[level][class_num][i] != NULL &&
+                        top_students[level][class_num][i]->grades[NUM_COURSES - 1] <
+                        top_students[level][class_num][min_grade_index]->grades[NUM_COURSES - 1]) {
+                        min_grade_index = i;
+                    }
+                }
+
+                if (top_students[level][class_num][min_grade_index] == NULL ||
+                    total_grade > top_students[level][class_num][min_grade_index]->grades[NUM_COURSES - 1]) {
+                    top_students[level][class_num][min_grade_index] = current_student;
+                }
+
+                current_student = current_student->next_stud;
+            }
+        }
+    }
+
+    for (int level = 0; level < NUM_LEVELS; level++) {
+        for (int class = 0; class < NUM_CLASSES; class++) {
+            int has_top_students = 0;
+
+            int i;
+            for (i = 0; i < 10; i++) {
+                if (top_students[level][class][i] != NULL) {
+                    has_top_students = 1;
+                    break;
+                }
+            }
+
+            if (has_top_students) {
+                printf("\nLevel: %d, Class: %d\n", level + 1, class + 1);
+                printf("====================================\n");
+                printf("Top Ten Students in %s:\n", subject_name);
+
+                for (i = 0; i < 10; i++) {
+                    struct student* current_student = top_students[level][class][i];
+                    if (current_student != NULL) {
+                        printf("%d. %s %s\n", i + 1, current_student->fname, current_student->lname);
+                        printf("   Total Grade: %d\n", current_student->grades[NUM_COURSES - 1]);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void present_top_ten() {
+    printf("Available Subjects:\n");
+    int i;
+    for (i = 0; i < NUM_COURSES; i++) {
+        printf("%d. %s\n", i + 1, course_names[i]);
+    }
+
+    int choice;
+    printf("Enter the number corresponding to the subject: ");
+    if (scanf("%d", &choice) != 1 || choice < 1 || choice > NUM_COURSES) {
+        printf("Invalid choice. Please try again.\n\n");
+        return;
+    }
+
+    present_top_students_by_subject(course_names[choice - 1]);
 }
 
 
@@ -327,7 +418,7 @@ void db_access_menu() {
     printf("3. Update student\n");
     printf("4. Search for a student by first name and last name\n");
     printf("5. Present the top ten students in each grade in a particular subject\n");
-    printf("6. Present the students who are candidates for departure, according to parameters of your choice.\n");
+    printf("6. Present the students who are candidates for departure\n");
     printf("7. Present average per course per layer\n");
     printf("8. Export DB\n");
     printf("0. Exit\n");
@@ -349,7 +440,7 @@ void db_access_menu() {
             search_student_by_name();
             break;
         case '5':
-
+            present_top_ten();
             break;
         case '6':
 
