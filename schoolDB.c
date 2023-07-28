@@ -287,6 +287,37 @@ void update_student() {
 }
 
 
+void search_student_by_name() {
+    char fname[NAME_LEN], lname[NAME_LEN];
+
+    printf("Enter first name: ");
+    scanf("%s", fname);
+
+    printf("Enter last name: ");
+    scanf("%s", lname);
+
+    int level, class_num;
+    for (level = 0; level < NUM_LEVELS; level++) {
+        for (class_num = 0; class_num < NUM_CLASSES; class_num++) {
+            struct student *current_student = S.db[level][class_num];
+            if (S.db[level][class_num] == current_student) {
+                printf("\nStudent Found:\n");
+                printf("Level: %d, Class: %d\n", level + 1, class_num + 1);
+                printf("Name: %s %s\n", current_student->fname, current_student->lname);
+                printf("Cell: %s\n", current_student->cell);
+                printf("Grades:\n");
+                for (int i = 0; i < NUM_COURSES; i++) {
+                    printf("%s: %d\n", course_names[i], current_student->grades[i]);
+                }
+                return;
+            }
+        }
+    }
+
+    printf("\nStudent %s %s not found in the database.\n", fname, lname);
+}
+
+
 void db_access_menu() {
     char choice;
     printf("\n-- Database Access Menu --\n");
@@ -315,6 +346,7 @@ void db_access_menu() {
             update_student();
             break;
         case '4':
+            search_student_by_name();
             break;
         case '5':
 
