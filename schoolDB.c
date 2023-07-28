@@ -452,6 +452,48 @@ void present_eligible_for_departure() {
     }
 }
 
+void present_avg_course_level() {
+    printf("\nAverage Grade per Course per Level:\n");
+
+    int total_grades[NUM_COURSES][NUM_LEVELS] = {0};
+    int num_students[NUM_COURSES][NUM_LEVELS] = {0};
+
+    int level;
+    for (level = 0; level < NUM_LEVELS; level++) {
+        for (int class_num = 0; class_num < NUM_CLASSES; class_num++) {
+            struct student* current_student = S.db[level][class_num];
+
+            while (current_student != NULL) {
+                int course;
+                for (course = 0; course < NUM_COURSES; course++) {
+                    total_grades[course][level] += current_student->grades[course];
+                    if (current_student->grades[course] > 0) {
+                        num_students[course][level]++;
+                    }
+                }
+
+                current_student = current_student->next_stud;
+            }
+        }
+    }
+
+
+    for (level = 0; level < NUM_LEVELS; level++) {
+        printf("\nLevel %d\n", level + 1);
+        printf("----------------------------\n");
+        int course;
+        for (course = 0; course < NUM_COURSES; course++) {
+            if (num_students[course][level] > 0) {
+                double average = (double)total_grades[course][level] / num_students[course][level];
+                printf("%s: %.2lf\n", course_names[course], average);
+            } else {
+                printf("%s: N/A (No students enrolled)\n", course_names[course]);
+            }
+        }
+    }
+}
+
+
 
 void db_access_menu() {
     char choice;
@@ -463,7 +505,7 @@ void db_access_menu() {
     printf("4. Search for a student by first name and last name\n");
     printf("5. Present the top ten students in each grade in a particular subject\n");
     printf("6. Present the students who are candidates for departure\n");
-    printf("7. Present average per course per layer\n");
+    printf("7. Present average per course per level\n");
     printf("8. Export DB\n");
     printf("0. Exit\n");
     printf("*======================================*\n\n");
@@ -490,7 +532,7 @@ void db_access_menu() {
             present_eligible_for_departure();
             break;
         case '7':
-
+            present_avg_course_level();
             break;
         case '8':
 
