@@ -150,7 +150,7 @@ void insert_new_student() {
 
     struct student* existing_student = find_student_by_name(fname, lname);
     if (existing_student != NULL) {
-        printf("Student %s %s already exists in the database.\n", fname, lname);
+        printf("Student %s %s already exists in the database.\n\n", fname, lname);
         return;
     }
 
@@ -173,7 +173,7 @@ void insert_new_student() {
         level--;
         class--;
         insert_student(level, class, new_student);
-        printf("Student %s %s has been inserted into Level %d, Class %d.\n", fname, lname, level + 1, class + 1);
+        printf("Student %s %s has been inserted into Level %d, Class %d.\n\n", fname, lname, level + 1, class + 1);
     }
 }
 
@@ -200,7 +200,7 @@ void delete_student() {
                     }
 
                     free(current_student);
-                    printf("Student %s %s has been deleted from the database.\n", fname, lname);
+                    printf("Student %s %s has been deleted from the database.\n\n", fname, lname);
                     return;
                 }
 
@@ -210,11 +210,87 @@ void delete_student() {
         }
     }
 
-    printf("Student %s %s not found in the database.\n", fname, lname);
+    printf("Student %s %s not found in the database.\n\n", fname, lname);
 }
 
+void update_student() {
+    char fname[NAME_LEN], lname[NAME_LEN];
+
+    printf("Enter first name: ");
+    scanf("%s", fname);
+
+    printf("Enter last name: ");
+    scanf("%s", lname);
+
+    struct student* found_student = find_student_by_name(fname, lname);
+    if (found_student == NULL) {
+        printf("Student %s %s not found in the database.\n", fname, lname);
+        return;
+    }
+
+    char choice;
+    printf("Select information to update:\n");
+    printf("1. First Name\n");
+    printf("2. Last Name\n");
+    printf("3. Cell Number\n");
+    printf("4. Grade\n");
+    printf("Enter your choice: ");
+    scanf("%s", &choice);
+
+    switch (choice) {
+        case '1': {
+            char new_fname[NAME_LEN];
+            printf("Enter new first name: ");
+            scanf("%s", new_fname);
+            strncpy(found_student->fname, new_fname, NAME_LEN - 1);
+            found_student->fname[NAME_LEN - 1] = '\0';
+            printf("First name updated.\n");
+            break;
+        }
+        case '2': {
+            char new_lname[NAME_LEN];
+            printf("Enter new last name: ");
+            scanf("%s", new_lname);
+            strncpy(found_student->lname, new_lname, NAME_LEN - 1);
+            found_student->lname[NAME_LEN - 1] = '\0';
+            printf("Last name updated.\n");
+            break;
+        }
+        case '3': {
+            char new_cell[CELL_NUM];
+            printf("Enter new cell number: ");
+            scanf("%s", new_cell);
+            strncpy(found_student->cell, new_cell, CELL_NUM - 1);
+            found_student->cell[CELL_NUM - 1] = '\0';
+            printf("Cell number updated.\n");
+            break;
+        }
+        case '4': {
+            int grade_choice;
+            printf("Select the grade to update (1-%d): ", NUM_COURSES);
+            scanf("%d", &grade_choice);
+
+            if (grade_choice < 1 || grade_choice > NUM_COURSES) {
+                printf("Invalid grade choice. No grades updated.\n\n");
+                break;
+            }
+
+            printf("Enter new grade for %s: ", course_names[grade_choice - 1]);
+            scanf("%d", &found_student->grades[grade_choice - 1]);
+            printf("Grade for %s updated.\n", course_names[grade_choice - 1]);
+            break;
+        }
+        default:
+            printf("Invalid choice. No information updated.\n\n");
+            break;
+    }
+}
+
+
 void db_access_menu() {
-    int choice;
+    char choice;
+    printf("\n-- Database Access Menu --\n");
+    printf("*======================================*\n");
     printf("1. Insert student\n");
     printf("2. Delete student\n");
     printf("3. Update student\n");
@@ -224,39 +300,39 @@ void db_access_menu() {
     printf("7. Present average per course per layer\n");
     printf("8. Export DB\n");
     printf("0. Exit\n");
+    printf("*======================================*\n\n");
     printf("Enter your choice: ");
-    scanf("%d", &choice);
+    scanf("%s", &choice);
 
     switch (choice) {
-        case 1:
+        case '1':
             insert_new_student();
             break;
-        case 2:
+        case '2':
             delete_student();
             break;
-        case 3:
+        case '3':
+            update_student();
+            break;
+        case '4':
+            break;
+        case '5':
 
             break;
-        case 4:
+        case '6':
 
             break;
-        case 5:
+        case '7':
 
             break;
-        case 6:
+        case '8':
 
             break;
-        case 7:
-
-            break;
-        case 8:
-
-            break;
-        case 0:
-            printf("Exiting the system.\n");
+        case '0':
+            printf("Exiting the system.\n\n");
             exit(0);
         default:
-            printf("Invalid choice. Please try again.\n");
+            printf("Invalid choice. Please try again.\n\n");
             break;
     }
 
@@ -265,7 +341,7 @@ void db_access_menu() {
 
 int main() {
     FILE* file;
-    char filename[] = "C:/Users/raedb/Documents/GitHub/checkpoint_raedkbar/students_with_class.txt";
+    char filename[] = "students_with_class.txt";
 
     file = fopen(filename, "r");
     if (file == NULL) {
