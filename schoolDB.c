@@ -408,6 +408,50 @@ void present_top_ten() {
     present_top_students_by_subject(course_names[choice - 1]);
 }
 
+int is_eligible_for_departure(struct student* s) {
+    if (s == NULL) {
+        return 0;
+    }
+
+    if (s->grades[NUM_COURSES - 1] < 60) {
+        return 0;
+    }
+
+    int i;
+    for (i = 0; i < NUM_COURSES - 1; i++) { // Exclude the last element (level) from the loop
+        if (s->grades[i] < 60) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+void present_eligible_for_departure() {
+    printf("\nStudents Eligible for Departure (Level 12, Grades >= 60 in All Subjects):\n");
+
+    int class;
+    for (class = 0; class < NUM_CLASSES; class++) {
+        struct student* current_student = S.db[NUM_LEVELS - 1][class];
+
+        while (current_student != NULL) {
+            if (is_eligible_for_departure(current_student)) {
+                printf("Name: %s %s\n", current_student->fname, current_student->lname);
+                printf("Cell: %s\n", current_student->cell);
+                printf("Grades:\n");
+
+                int i;
+                for (i = 0; i < NUM_COURSES; i++) {
+                    printf("%s: %d\n", course_names[i], current_student->grades[i]);
+                }
+                printf("\n");
+            }
+
+            current_student = current_student->next_stud;
+        }
+    }
+}
+
 
 void db_access_menu() {
     char choice;
@@ -443,7 +487,7 @@ void db_access_menu() {
             present_top_ten();
             break;
         case '6':
-
+            present_eligible_for_departure();
             break;
         case '7':
 
