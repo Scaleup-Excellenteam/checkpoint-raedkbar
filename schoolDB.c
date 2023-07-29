@@ -409,13 +409,13 @@ void search_student_by_name() {
     for (level = 0; level < NUM_LEVELS; level++) {
         for (class = 0; class < NUM_CLASSES; class++) {
             // Get the current student in the database
-            struct student* current_student = S.db[level][class];
+            struct student *current_student = S.db[level][class];
 
             // If the current student is not NULL (i.e., there are students in this level and class)
-            if (current_student != NULL) {
+            while (current_student != NULL) {
                 // Compare the first name and last name of the current student with the input names
                 if (strcmp(current_student->fname, fname) == 0 && strcmp(current_student->lname, lname) == 0) {
-                    // Student found, print their information and return
+                    // Student found, print their information
                     printf("\nStudent Found:\n");
                     printf("Level: %d, Class: %d\n", level + 1, class + 1);
                     printf("Name: %s %s\n", current_student->fname, current_student->lname);
@@ -427,8 +427,10 @@ void search_student_by_name() {
                     for (course = 0; course < NUM_COURSES; course++) {
                         printf("%s: %d\n", course_names[course], current_student->grades[course]);
                     }
-                    return; // Student found, no need to continue searching
+                    return;
                 }
+
+                current_student = current_student->next_stud;
             }
         }
     }
